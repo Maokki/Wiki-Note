@@ -479,6 +479,7 @@ watch(() => currentCategory.value.sortOrder, (newOrder) => {
       @delete="deleteItem"
     />
   </div>
+}
 </template>
 
 <script setup lang="ts">
