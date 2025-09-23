@@ -739,32 +739,103 @@ watch(() => currentCategory.value.sortOrder, (newOrder) => {
 .flashcard-card {
   width: 100%;
   max-width: 600px;
-  min-height: 200px;
-  background: linear-gradient(135deg, rgba(253,246,227,0.95) 0%, rgba(245,230,211,0.95) 100%);
-  border-radius: 12px;
+  min-height: 280px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 250, 249, 0.98) 100%);
+  border-radius: 20px;
   box-shadow: var(--shadow-lg);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: var(--space-4);
+  padding: var(--space-6);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
   white-space: pre-wrap;
+  border: 2px solid var(--color-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.flashcard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-maomao);
+  transition: all 0.3s ease;
 }
 
 .flashcard-card:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 20px 40px -10px rgba(107, 70, 193, 0.2);
+  border-color: var(--color-maomao);
+}
+
+.flashcard-indicator {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  background: var(--gradient-accent);
+  color: white;
+  padding: var(--space-1) var(--space-3);
+  border-radius: 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  box-shadow: var(--shadow-base);
 }
 
 .flashcard-content {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--color-gray-900);
+  line-height: 1.5;
+  margin: var(--space-4) 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flashcard-counter {
+  position: absolute;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  background: rgba(107, 70, 193, 0.1);
+  color: var(--color-maomao);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
 .flashcard-controls {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .flashcard-controls {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .flashcard-controls .btn {
+    width: 100%;
+  }
+  
+  .flashcard-card {
+    min-height: 240px;
+    margin: 0 var(--space-2);
+  }
+  
+  .flashcard-content {
+    font-size: 1.2rem;
+  }
 }
 </style>

@@ -1,7 +1,7 @@
 {
-  "name": "WikiNotes",
-  "short_name": "WikiNotes",
-  "description": "Personal wiki and notes management app",
+  "name": "MaoMao's Study Notes",
+  "short_name": "MaoMao Notes",
+  "description": "Apothecary-inspired study notes and learning companion",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

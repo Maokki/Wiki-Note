@@ -245,9 +245,10 @@ watch(() => searchQuery.value, (newValue) => {
 
 .dashboard-subtitle {
   font-size: var(--text-sm);
-  color: var(--color-maomao);
+  color: var(--color-secondary);
   font-weight: 600;
   font-style: italic;
+  text-shadow: 0 1px 2px rgba(139, 69, 19, 0.1);
 }
 
 .dashboard-description {
