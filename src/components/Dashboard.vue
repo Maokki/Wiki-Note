@@ -4,47 +4,59 @@
     <div class="container">
       <!-- Header -->
       <header class="dashboard-header">
-        <div class="flex items-center justify-between mb-4">
+        <div class="header-content">
           <div>
-            <h1 class="dashboard-title">WikiNotes</h1>
-            <p class="dashboard-description">Your personal knowledge base</p>
+            <div class="title-container">
+              <h1 class="dashboard-title">
+                📚 StudyNotes
+                <span class="maomao-emoji">🧪</span>
+              </h1>
+              <p class="dashboard-subtitle">Curious minds learn better</p>
+            </div>
+            <p class="dashboard-description">Your personal study companion inspired by Maomao's curiosity</p>
           </div>
-<button 
-  @click="showExportImport = true" 
-  class="btn btn-outline backup-btn"
->
-  <Download class="backup-icon" />
-  <span class="backup-label"></span>
-</button>
+          <button 
+            @click="showExportImport = true" 
+            class="btn btn-maomao backup-btn"
+          >
+            <Download :size="18" />
+            <span class="backup-label">Backup</span>
+          </button>
         </div>
 
-<!-- Search -->
-<div class="search-container mb-4">
-  <input
-    v-model="searchQuery"
-    type="text"
-    placeholder="🔎︎ Search notes..."
-    class="search-input"
-  />
-</div>
+        <!-- Search -->
+        <div class="search-container">
+          <div class="search-wrapper">
+            <Search :size="20" class="search-icon" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search your study notes..."
+              class="search-input"
+            />
+          </div>
+        </div>
 
       </header>
 
       <!-- Search Results -->
       <div v-if="searchQuery && searchResults.length > 0" class="search-results mb-6">
-        <h2 class="text-xl font-semibold mb-3">Search Results</h2>
-        <div class="grid grid-cols-1 gap-3">
+        <h2 class="results-title">🔍 Search Results</h2>
+        <div class="results-grid">
           <div
             v-for="result in searchResults"
             :key="result.item.id"
-            class="card search-result-item"
+            class="result-card"
             @click="openItem(result.category, result.item)"
           >
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="font-medium">{{ result.item.name }}</h3>
-              <span class="text-sm text-gray-500">{{ result.category.name }}</span>
+            <div class="result-header">
+              <h3 class="result-title">{{ result.item.name }}</h3>
+              <span class="result-category">{{ result.category.name }}</span>
             </div>
-            <div class="flex flex-wrap gap-1 mb-2">
+            <div class="result-tags">
+              <span v-for="tag in result.item.tags.slice(0, 3)" :key="tag" class="result-tag">
+                {{ tag }}
+              </span>
             </div>
           </div>
         </div>
@@ -52,21 +64,21 @@
 
       <!-- Categories -->
       <section v-if="!searchQuery" class="categories-section">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-semibold">Categories</h2>
+        <div class="section-header">
+          <h2 class="section-title">📖 Study Categories</h2>
           <button @click="showCreateCategory = true" class="btn btn-primary">
             <Plus :size="20" />
-            <span class="hidden sm:inline">New Category</span>
+            <span class="btn-text">New Category</span>
           </button>
         </div>
 
         <div v-if="categories.length === 0" class="empty-state">
-          <BookOpen :size="48" class="empty-icon" />
-          <h3 class="text-lg font-medium mb-2">No categories yet</h3>
-          <p class="text-gray-600 mb-4">Create your first category to start organizing your notes</p>
+          <div class="empty-icon">📚</div>
+          <h3 class="empty-title">Ready to start studying?</h3>
+          <p class="empty-description">Create your first study category and begin your learning journey like Maomao!</p>
           <button @click="showCreateCategory = true" class="btn btn-primary">
             <Plus :size="20" />
-            Create Category
+            Start Learning
           </button>
         </div>
 
@@ -77,7 +89,7 @@
             class="category-card"
             @click="openCategory(category)"
           >
-            <div class="flex justify-between items-start mb-3">
+            <div class="category-header">
               <h3 class="category-title">{{ category.name }}</h3>
               <button
                 @click.stop="deleteCategory(category.id)"
@@ -89,8 +101,16 @@
             </div>
             <div class="category-stats">
               <div class="stat">
-                <span class="stat-value">{{ category.items.length }}</span>
-                <span class="stat-text"> つ</span>
+                <span class="stat-number">{{ category.items.length }}</span>
+                <span class="stat-label">{{ category.items.length === 1 ? 'note' : 'notes' }}</span>
+              </div>
+              <div class="category-progress">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    :style="{ width: Math.min(category.items.length * 10, 100) + '%' }"
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
@@ -121,7 +141,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { Plus, BookOpen, Trash2, Download } from 'lucide-vue-next';
+import { Plus, BookOpen, Trash2, Download, Search } from 'lucide-vue-next';
 import { useStorage } from '../composables/useStorage';
 import type { Category, WikiItem } from '../utils/storage';
 import CreateCategoryModal from './CreateCategoryModal.vue';
@@ -177,122 +197,200 @@ watch(() => searchQuery.value, (newValue) => {
 </script>
 
 <style scoped>
-/* ===========================
-   Dashboard Layout
-=========================== */
+.dashboard {
+  padding-bottom: 80px;
+}
+
+.dashboard-header {
+  margin-bottom: var(--space-8);
+}
+
+.header-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+}
+
+.title-container {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
 .dashboard-title {
-  font-size: clamp(2rem, 5vw, 4.5rem);
-  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-maomao) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: 1.1;
-  margin: var(--space-2);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-
-  /* Dark brown glow */
-  color: rgb(139, 69, 19); /* SaddleBrown */
-  text-shadow:
-    0 0 6px #2b1a0e,
-    0 0 14px #3e2616,
-    0 0 28px #5c3620,
-    0 0 45px #7a452a;
-
-  font-family: 'Sakura Brush', 'Orbitron', 'Brush Script MT', cursive, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Responsive adjustments for smaller devices (like Oppo) */
-@media (max-width: 480px) {
-  .dashboard-title {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
-    letter-spacing: 1px;
-    text-shadow:
-      0 0 4px #2b1a0e,
-      0 0 10px #3e2616,
-      0 0 18px #5c3620;
-    margin: var(--space-1);
-  }
+.maomao-emoji {
+  font-size: 0.6em;
+  margin-left: var(--space-2);
+  animation: bounce 2s infinite;
 }
 
-@media (max-width: 360px) {
-  .dashboard-title {
-    font-size: clamp(1.5rem, 6vw, 2rem);
-    letter-spacing: 0.5px;
-    text-shadow:
-      0 0 3px #2b1a0e,
-      0 0 8px #3e2616,
-      0 0 14px #5c3620;
-  }
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+  60% { transform: translateY(-3px); }
 }
 
+.dashboard-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-maomao);
+  font-weight: 600;
+  font-style: italic;
+}
 
 .dashboard-description {
-  font-size: clamp(0.7rem, 2vw, 1.4rem); /* slightly larger */
+  font-size: var(--text-base);
   font-weight: 600;
-  margin: var(--space-1);
-  color: #444; /* darker for better contrast */
-  letter-spacing: 0.5px;
-  font-family: 'Comic Sans MS', 'Fredoka One', 'Patrick Hand', cursive, sans-serif;
+  color: var(--color-gray-600);
+  letter-spacing: -0.01em;
 }
 
-/* ===========================
-   Search Bar
-=========================== */
 .search-container {
   width: 100%;
+  max-width: 600px;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: var(--space-4);
+  color: var(--color-gray-400);
+  z-index: 1;
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 12px; /* no need for extra padding for icon */
-  border-radius: 8px;
-  background: rgba(253, 246, 227, 0.95);
-  border: 2px solid var(--color-gray-300);
-  font-size: 1rem;
-  line-height: 1.5;
-  transition: all 0.2s ease;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--color-gray-200);
+  font-size: var(--text-base);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .search-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   outline: none;
+  background: rgba(255, 255, 255, 1);
 }
 
-/* Tablet */
-@media (max-width: 768px) {
-  .search-input {
-    font-size: 0.95rem;
-    padding: 9px 12px;
-  }
+.search-results {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-gray-200);
+  backdrop-filter: blur(10px);
 }
 
-/* Mobile */
-@media (max-width: 480px) {
-  .search-input {
-    font-size: 0.9rem;
-    padding: 8px 10px;
-    border-radius: 6px;
-  }
+.results-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-4);
 }
 
+.results-grid {
+  display: grid;
+  gap: var(--space-3);
+}
 
-/* ===========================
-   Categories
-=========================== */
+.result-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.result-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.result-title {
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.result-category {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  background: var(--color-gray-100);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 8px;
+}
+
+.result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.result-tag {
+  font-size: var(--text-xs);
+  background: var(--gradient-maomao);
+  color: white;
+  padding: var(--space-1) var(--space-2);
+  border-radius: 12px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.section-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
+}
+
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
 }
 
 .category-card {
-  background: linear-gradient(135deg, rgba(253, 246, 227, 0.95), rgba(245, 230, 211, 0.95));
-  border-radius: 12px;
-  padding: var(--space-2);
-  box-shadow: var(--shadow-lg);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 16px;
+  padding: var(--space-6);
+  box-shadow: var(--shadow-base);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border: 1px solid rgba(139, 69, 19, 0.1);
   backdrop-filter: blur(10px);
   overflow: hidden;
 }
@@ -303,132 +401,191 @@ watch(() => searchQuery.value, (newValue) => {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .category-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: rgba(139, 69, 19, 0.3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.category-card:hover::before {
+  opacity: 1;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
 }
 
 .category-title {
-  font-size: clamp(1.25rem, 2vw, 2rem);
-  font-weight: 900;
+  font-size: var(--text-xl);
+  font-weight: 700;
   color: var(--color-gray-900);
+  letter-spacing: -0.01em;
 }
 
 .category-stats {
   display: flex;
-  gap: var(--space-0);
-  margin-bottom: var(--space-0);
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
-.stat-value {
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.stat-number {
+  font-size: var(--text-2xl);
   font-weight: 600;
-  gap: 4px;
   color: var(--color-primary);
 }
 
-.stat-text {
+.stat-label {
   font-size: var(--text-sm);
   color: var(--color-gray-600);
+  font-weight: 500;
 }
 
-/* Delete button */
+.category-progress {
+  width: 100%;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--color-gray-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-secondary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
 .delete-btn {
   background: none;
   border: none;
   color: var(--color-gray-500);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-.delete-btn:hover {
-  color: var(--color-error);
-  background-color: rgba(220, 20, 60, 0.1);
-  transform: scale(1.1);
+  padding: var(--space-1);
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
 }
 
-/* ===========================
-   Search Results
-=========================== */
-.search-results {
-  background: linear-gradient(135deg, rgba(249, 238, 207, 0.95), rgba(245, 230, 211, 0.95));
-  border-radius: 10px;
-  padding: var(--space-2);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(139, 69, 19, 0.1);
+.category-card:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  color: var(--color-error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  box-shadow: var(--shadow-base);
+  border: 1px solid var(--color-gray-200);
   backdrop-filter: blur(10px);
 }
 
-.search-result-item,
-.recent-item {
-  cursor: pointer;
-  transition: all 0.3s ease;
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-4);
 }
 
-.search-result-item:hover,
-.recent-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.empty-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-2);
 }
 
-/* ===========================
-   Backup Button
-=========================== */
+.empty-description {
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-6);
+  line-height: 1.6;
+}
+
 .backup-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 0.95rem;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.backup-label {
   font-weight: 600;
-  border-radius: 8px;
-  transition: all 0.2s ease;
 }
 
-.backup-btn:hover {
-  background: rgba(18, 177, 18, 0.08);
-  border-color: rgb(18, 177, 18);
-  transform: translateY(-2px);
+.btn-text {
+  display: inline;
 }
 
-.backup-icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* ===========================
-   Responsive Adjustments
-=========================== */
-
-/* Tablet */
-@media (max-width: 1024px) {
-  .categories-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-}
-
-/* Mobile Large */
 @media (max-width: 768px) {
-  .dashboard-header { flex-direction: column; align-items: center; text-align: center; }
-  .categories-grid { grid-template-columns: 1fr; }
-  .search-container { width: 100%; }
-
-  /* Backup button */
-  .backup-btn { padding: 6px 10px; font-size: 0.85rem; }
-  .backup-label { display: none; }
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+  
+  .dashboard-title {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+  }
+  
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .btn-text {
+    display: none;
+  }
+  
+  .backup-label {
+    display: none;
+  }
+  
+  .search-container {
+    max-width: none;
+  }
 }
 
-/* Mobile Small */
 @media (max-width: 480px) {
-  .search-input { font-size: 0.9rem; padding: var(--space-2); }
-  .btn { font-size: 0.9rem; padding: var(--space-1) var(--space-2); }
+  .title-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+  
+  .dashboard-subtitle {
+    margin-left: 0;
+  }
 }
 
-/* Short screens (landscape phones) */
+@media (max-width: 360px) {
+  .dashboard-title {
+    font-size: clamp(1.5rem, 8vw, 2rem);
+  }
+}
+
 @media (max-height: 500px) {
-  .dashboard { padding-bottom: 40px; }
+  .dashboard {
+    padding-bottom: 40px;
+  }
 }
-
 </style>

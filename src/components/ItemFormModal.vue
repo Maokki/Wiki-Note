@@ -31,6 +31,8 @@
               type="text"
               class="input"
               @keydown="handleTagInput"
+              @input="handleTagInputChange"
+              placeholder="Add tags (press Enter or comma to separate)"
             />
             <div v-if="tags.length > 0" class="tags-list">
               <span v-for="tag in tags" :key="tag" class="tag removable">
@@ -41,7 +43,7 @@
               </span>
             </div>
           </div>
-          <p class="form-help">Press Enter or comma to add tags</p>
+          <p class="form-help">Press Enter, comma, or space to add tags</p>
         </div>
         
         <div class="form-group">
@@ -99,10 +101,24 @@ const isFormValid = computed(() =>
 )
 
 const handleTagInput = (event: KeyboardEvent) => {
-  if (event.key === 'Enter' || event.key === ',') {
+  // Handle both desktop and mobile keyboards
+  if (event.key === 'Enter' || event.key === ',' || event.key === 'Go' || event.key === 'Done') {
     event.preventDefault()
     addTag()
-  } else if (
+  }
+  // Handle mobile comma input - check for comma in the input value
+  else if (tagInput.value.includes(',')) {
+    event.preventDefault()
+    // Split by comma and add all tags
+    const tags = tagInput.value.split(',').map(t => t.trim()).filter(t => t)
+    tags.forEach(tag => {
+      if (tag && !tags.value.includes(tag)) {
+        tags.value.push(tag)
+      }
+    })
+    tagInput.value = ''
+  }
+  else if (
     event.key === 'Backspace' &&
     !tagInput.value &&
     tags.value.length > 0
@@ -112,10 +128,23 @@ const handleTagInput = (event: KeyboardEvent) => {
 }
 
 const addTag = () => {
-  const tag = tagInput.value.trim().replace(/,$/, '')
-  if (tag && !tags.value.includes(tag)) {
-    tags.value.push(tag)
-    tagInput.value = ''
+  // Handle multiple tags separated by commas
+  const inputTags = tagInput.value.split(',').map(t => t.trim()).filter(t => t)
+  
+  inputTags.forEach(tag => {
+    if (tag && !tags.value.includes(tag)) {
+      tags.value.push(tag)
+    }
+  })
+  
+  tagInput.value = ''
+}
+
+// Handle input changes for mobile keyboards
+const handleTagInputChange = () => {
+  // Auto-add tags when comma is detected
+  if (tagInput.value.includes(',')) {
+    addTag()
   }
 }
 
@@ -172,56 +201,57 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(139, 69, 19, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: var(--space-4);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .modal {
-  background: linear-gradient(135deg, rgba(253, 246, 227, 0.98) 0%, rgba(245, 230, 211, 0.98) 100%);
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 20px;
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 2px solid rgba(139, 69, 19, 0.2);
-  backdrop-filter: blur(15px);
+  border: 1px solid var(--color-gray-200);
+  backdrop-filter: blur(20px);
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4);
-  border-bottom: 2px solid rgba(139, 69, 19, 0.1);
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-gray-200);
   flex-shrink: 0;
   position: relative;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .modal-header::after {
   content: '';
   position: absolute;
   bottom: -2px;
-  left: var(--space-4);
-  width: 50px;
+  left: var(--space-6);
+  width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
-  border-radius: 2px;
+  background: var(--gradient-primary);
+  border-radius: 3px;
 }
 
 .modal-title {
-  font-size: var(--text-xl);
-  font-weight: 600;
+  font-size: var(--text-2xl);
+  font-weight: 700;
   color: var(--color-gray-900);
   margin: 0;
-  text-shadow: 0 1px 2px rgba(139, 69, 19, 0.1);
+  letter-spacing: -0.01em;
 }
 
 .close-btn {
@@ -229,32 +259,32 @@ onMounted(() => {
   border: none;
   color: var(--color-gray-500);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  padding: var(--space-2);
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .close-btn:hover {
-  color: var(--color-gray-700);
-  background-color: rgba(139, 69, 19, 0.1);
-  transform: scale(1.1);
+  color: var(--color-error);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .modal-body {
-  padding: var(--space-2);
+  padding: var(--space-6);
   overflow-y: auto;
   flex: 1;
 }
 
 .form-group {
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-6);
 }
 
 .form-label {
   display: block;
-  font-weight: 500;
-  color: var(--color-gray-700);
-  margin-bottom: var(--space-1);
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-base);
 }
 
 .tags-input-container {
@@ -264,21 +294,22 @@ onMounted(() => {
 .tags-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-top: var(--space-2);
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .tag.removable {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  gap: var(--space-1);
+  background: var(--gradient-maomao);
   color: white;
-  padding: 4px var(--space-2);
-  border-radius: 16px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 20px;
   font-size: var(--text-sm);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(220, 20, 60, 0.3);
+  font-weight: 500;
+  box-shadow: var(--shadow-base);
+  border: 1px solid var(--color-maomao-dark);
 }
 
 .remove-tag-btn {
@@ -291,28 +322,30 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 18px;
+  height: 18px;
 }
 
 .remove-tag-btn:hover {
   color: white;
   background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
 }
 
 .form-help {
   font-size: var(--text-xs);
   color: var(--color-gray-500);
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
+  font-style: italic;
 }
 
 .form-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
   justify-content: flex-end;
-  margin-top: var(--space-5);
-  border-top: 2px solid rgba(139, 69, 19, 0.1);
-  padding-top: var(--space-4);
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--color-gray-200);
+  padding-top: var(--space-6);
 }
 
 @media (max-width: 768px) {
@@ -322,6 +355,7 @@ onMounted(() => {
   
   .modal {
     max-height: 95vh;
+    border-radius: 16px;
   }
   
   .form-actions {
@@ -330,6 +364,11 @@ onMounted(() => {
   
   .form-actions .btn {
     width: 100%;
+  }
+  
+  .modal-header,
+  .modal-body {
+    padding: var(--space-4);
   }
 }
 </style>
